@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    env_file:
+      - docker_secrets.env
+    volumes:
+      - .:/app
+      - logs:/app/logs
+    depends_on:
+      - db
+    networks:
+      - django-network
+    container_name: django
+
+  db:
+    image: postgres:12.2
+    env_file:
+      - docker_secrets.env
+    ports:
+      - '5434:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+    networks:
+      - django-network
+    container_name: postgres_db
+
+networks:
+  django-network:
+
+volumes:
+  db:
+  logs:
