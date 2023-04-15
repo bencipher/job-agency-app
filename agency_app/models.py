@@ -3,6 +3,9 @@ from django.db import models
 
 # Create your models here.
 class Job(models.Model):
+    # class Meta:
+    #     app_label = 'agency_app'
+
     id = models.UUIDField(primary_key=True, editable=False)
     title = models.CharField(max_length=255)
     description = models.TextField()
