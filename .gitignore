@@ -18,7 +18,7 @@ dist/
 env/
 .venv/
 .env
-
+docker_secrets.env
 /~
 /node_modules
 .sass-cache
