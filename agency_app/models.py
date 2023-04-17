@@ -2,6 +2,8 @@ import uuid
 
 from django.db import models
 
+from users.models import Applicant, Recruiter
+
 
 class JobManager(models.Manager):
     def get_queryset(self):
@@ -19,6 +21,8 @@ class Job(models.Model):
     location = models.CharField(max_length=255)
     date_posted = models.DateField(auto_now_add=True)
     is_cancelled = models.BooleanField(default=False)
+    recruiter = models.ForeignKey(Recruiter, on_delete=models.CASCADE, related_name='jobs')
+    applicants = models.ManyToManyField(Applicant, related_name='jobs_applied_to')
 
     objects = JobManager()
 

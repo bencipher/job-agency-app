@@ -46,3 +46,44 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+class Organization(models.Model):
+    name = models.CharField(max_length=255)
+    address = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=20)
+
+    class Meta:
+        verbose_name = 'organization'
+        verbose_name_plural = 'organizations'
+
+    def __str__(self):
+        return self.name
+
+
+class Recruiter(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    job_title = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=20)
+
+    class Meta:
+        verbose_name = 'recruiter'
+        verbose_name_plural = 'recruiters'
+
+    def __str__(self):
+        return self.user.email
+
+
+class Applicant(models.Model):
+    user = models.OneToOneField(CustomUser,
+                                on_delete=models.CASCADE,
+                                related_name='applicant_profile')
+    technology_stack = models.CharField(max_length=255)
+    expected_salary = models.DecimalField(max_digits=10, decimal_places=2)
+    hourly_rate = models.DecimalField(max_digits=10, decimal_places=2)
+    resume = models.CharField(max_length=255)
+    address = models.CharField(max_length=255)
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    zip_code = models.CharField(max_length=20)
