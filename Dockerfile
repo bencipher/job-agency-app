@@ -8,9 +8,15 @@ ENV PYTHONUNBUFFERED 1
 # set work directory
 WORKDIR /app
 
+# install pipenv
+RUN pip install pipenv
+
+# copy Pipfile and Pipfile.lock
+COPY Pipfile* /app/
+
 # install dependencies
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install pipenv && pipenv install --system --dev
+
 
 # copy project
 COPY . /app/

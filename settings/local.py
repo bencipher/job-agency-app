@@ -20,3 +20,4 @@ DATABASES = {
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
 }
+print(DATABASES)
