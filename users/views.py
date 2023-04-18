@@ -1,10 +1,29 @@
-from rest_framework import permissions, viewsets
+from rest_framework import viewsets
 
-from users.models import CustomUser
-from users.serializers import CustomUserSerializer
+from .models import Applicant, CustomUser, Organization, Recruiter
+from .serializers import (ApplicantSerializer, CustomUserSerializer,
+                          OrganizationSerializer, RecruiterSerializer)
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
-    serializer_class = CustomUserSerializer
     queryset = CustomUser.objects.all()
-    permission_classes = [permissions.IsAdminUser]
+    serializer_class = CustomUserSerializer
+    # permission_classes = [permissions.IsAdminUser]
+
+
+class OrganizationViewSet(viewsets.ModelViewSet):
+    queryset = Organization.objects.all()
+    serializer_class = OrganizationSerializer
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
+class RecruiterViewSet(viewsets.ModelViewSet):
+    queryset = Recruiter.objects.all()
+    serializer_class = RecruiterSerializer
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
+class ApplicantViewSet(viewsets.ModelViewSet):
+    queryset = Applicant.objects.all()
+    serializer_class = ApplicantSerializer
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]

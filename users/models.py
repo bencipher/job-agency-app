@@ -2,6 +2,8 @@ from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
                                         PermissionsMixin)
 from django.db import models
 
+from users.tech_stack_enum import TechStack, TechStackGroup
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -49,9 +51,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 class Organization(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     address = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=20)
+    status = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = 'organization'
@@ -66,6 +69,7 @@ class Recruiter(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     job_title = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=20)
+    is_owner = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'recruiter'
@@ -75,11 +79,38 @@ class Recruiter(models.Model):
         return self.user.email
 
 
+class TechnologyStack(models.Model):
+    technology_stack = models.CharField(choices=[(tech.name, tech.value) for tech in TechStack],
+                                        max_length=100,
+                                        default=TechStack.OTHER.name)
+
+    class Meta:
+        verbose_name = 'technology stack'
+        verbose_name_plural = 'technology stacks'
+
+    def __str__(self):
+        return self.technology_stack
+
+
+class TechnologyStackGroup(models.Model):
+    tech_stack_group = models.CharField(choices=[
+        (tech.name, tech.value) for tech in TechStackGroup],
+        max_length=100, default=TechStack.OTHER.name)
+
+    class Meta:
+        verbose_name = 'technology stack group'
+        verbose_name_plural = 'technology stack groups'
+
+    def __str__(self):
+        return self.tech_stack_group
+
+
 class Applicant(models.Model):
     user = models.OneToOneField(CustomUser,
                                 on_delete=models.CASCADE,
                                 related_name='applicant_profile')
-    technology_stack = models.CharField(max_length=255)
+    technology_stack = models.ManyToManyField(TechnologyStack, related_name='tech_stack')
+    tech_stack_group = models.ManyToManyField(TechnologyStackGroup, related_name='stack_group')
     expected_salary = models.DecimalField(max_digits=10, decimal_places=2)
     hourly_rate = models.DecimalField(max_digits=10, decimal_places=2)
     resume = models.CharField(max_length=255)
