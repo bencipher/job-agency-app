@@ -12,7 +12,7 @@ class JobManager(models.Manager):
 
 # Create your models here.
 class Job(models.Model):
-    id = models.UUIDField(primary_key=True, editable=False)
+    id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
     title = models.CharField(max_length=255)
     description = models.TextField()
     contract_type = models.CharField(max_length=255,
@@ -36,8 +36,3 @@ class Job(models.Model):
 
     class Meta:
         ordering = ('-date_posted',)
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.id = uuid.uuid4()
-        super().save(*args, **kwargs)
