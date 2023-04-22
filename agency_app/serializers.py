@@ -4,6 +4,9 @@ from agency_app.models import Job
 
 
 class JobSerializer(serializers.ModelSerializer):
+    recruiter = ''
+    applicant = ''
+
     class Meta:
         model = Job
         fields = '__all__'
