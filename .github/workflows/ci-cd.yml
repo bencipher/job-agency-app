@@ -11,11 +11,11 @@ jobs:
     steps:
       - name: Set environment variables
         run: |
-          echo "export DB_NAME=${{ secrets.POSTGRES_DB }}" >> $GITHUB_ENV
-          echo "export DB_USER=${{ secrets.POSTGRES_USER }}" >> $GITHUB_ENV
+          echo "export POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> $GITHUB_ENV
+          echo "export POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> $GITHUB_ENV
           echo "export DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> $GITHUB_ENV
-          echo "export DB_HOST=${{ secrets.POSTGRES_HOST }}" >> $GITHUB_ENV
-          echo "export DB_PORT=${{ secrets.POSTGRES_PORT }}" >> $GITHUB_ENV
+          echo "export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> $GITHUB_ENV
+          echo "export POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}" >> $GITHUB_ENV
           echo "export DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> $GITHUB_ENV
           echo "export DEBUG=${{ secrets.DEBUG }}" >> $GITHUB_ENV
 
