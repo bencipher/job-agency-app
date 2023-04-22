@@ -7,7 +7,7 @@ from .base import *  # noqa
 load_dotenv()
 # no dev dependency library in main code,
 # local should not be committed or removed later on
-DEBUG = True
+DEBUG = os.getenv('DEBUG', True)
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 DATABASES = {
