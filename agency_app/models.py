@@ -25,9 +25,7 @@ class Job(models.Model):
     recruiter = models.ForeignKey(Recruiter,
                                   on_delete=models.CASCADE,
                                   related_name='jobs', null=True)
-    applicants = models.ManyToManyField(Applicant,
-                                        related_name='jobs_applied_to',
-                                        null=True)
+    applicants = models.ManyToManyField(Applicant, related_name='jobs_applied_to')
 
     objects = JobManager()
 
