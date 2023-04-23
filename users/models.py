@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
                                         PermissionsMixin)
 from django.db import models
@@ -30,6 +32,7 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
+    id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
@@ -51,7 +54,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 class Organization(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
+    name = models.CharField(editable=False, max_length=255, unique=True)
+    name = models.CharField(editable=False, max_length=255, unique=True)
     address = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=20)
     status = models.BooleanField(default=True)
@@ -65,8 +70,11 @@ class Organization(models.Model):
 
 
 class Recruiter(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization,
+                                     on_delete=models.CASCADE,
+                                     related_name='organization_recruiters')
     job_title = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=20)
     is_owner = models.BooleanField(default=False)
@@ -106,6 +114,7 @@ class TechnologyStackGroup(models.Model):
 
 
 class Applicant(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
     user = models.OneToOneField(CustomUser,
                                 on_delete=models.CASCADE,
                                 related_name='applicant_profile')
