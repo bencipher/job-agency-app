@@ -19,10 +19,17 @@ class OrganizationSerializer(serializers.ModelSerializer):
         model = Organization
         fields = ['name', 'address']
 
+    def update(self, instance, validated_data):
+        organization = instance
+        organization.name = validated_data.get('name', organization.name)
+        organization.address = validated_data.get('address', organization.address)
+        organization.save()
+        return super().update(organization, validated_data)
+
 
 class RecruiterSerializer(serializers.HyperlinkedModelSerializer):
     url = serializers.HyperlinkedIdentityField(required=False, view_name='recruiter-detail')
-    organization = OrganizationSerializer()
+    organization = OrganizationSerializer(required=False)
     user = CustomUserSerializer()
 
     class Meta:
@@ -51,7 +58,8 @@ class RecruiterSerializer(serializers.HyperlinkedModelSerializer):
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', None)
-        organization_data = validated_data.pop('organization')
+        # strip unused payload, I want to maintain a separate endpoint for updating organizations
+        validated_data.pop('organization')
 
         if user_data:
             user = instance.user
@@ -60,13 +68,8 @@ class RecruiterSerializer(serializers.HyperlinkedModelSerializer):
             user.last_name = user_data.get('last_name', user.last_name)
             user.save()
 
-        organization = instance.organization
-        organization.name = organization_data.get('name', organization.name)
-        organization.address = organization_data.get('address', organization.address)
-        organization.phone_number = organization_data.get('phone_number', organization.phone_number)
-        organization.save()
-
-        instance.is_owner = validated_data.get('is_owner', instance.is_owner)
+        instance.job_title = validated_data.get('job_title', instance.job_title)
+        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
         instance.save()
 
         return instance

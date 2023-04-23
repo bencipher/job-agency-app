@@ -1,9 +1,10 @@
 from rest_framework import status, viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import (AllowAny, IsAdminUser, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 
 from .models import Applicant, CustomUser, Organization, Recruiter
-from .permissions import IsRecruiterOwner
+from .permissions import IsOrganizationOwner
 from .serializers import (ApplicantSerializer, CustomUserSerializer,
                           OrganizationSerializer, RecruiterSerializer)
 
@@ -17,13 +18,21 @@ class CustomUserViewSet(viewsets.ModelViewSet):
 class OrganizationViewSet(viewsets.ModelViewSet):
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
-    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsOrganizationOwner, IsAuthenticatedOrReadOnly]
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        partial = request.method == 'PATCH'
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        organization = serializer.save()
+
+        return Response(RecruiterSerializer(organization).data)
 
 
 class RecruiterViewSet(viewsets.ModelViewSet):
     serializer_class = RecruiterSerializer
     queryset = Recruiter.objects.all()
-    permission_classes = [AllowAny]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -31,10 +40,12 @@ class RecruiterViewSet(viewsets.ModelViewSet):
         return context
 
     def get_permissions(self):
-        if self.action in ['retrieve', 'partial_update', 'update', 'destroy']:
-            permission_classes = [IsAuthenticated, IsRecruiterOwner]
-        else:
+        if self.action == 'retrieve':
+            permission_classes = [IsAuthenticated]
+        elif self.action == 'create':
             permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
