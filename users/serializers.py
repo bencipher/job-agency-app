@@ -4,20 +4,30 @@ from rest_framework import serializers
 from users.models import Applicant, CustomUser, Organization, Recruiter
 
 
-class CustomUserSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(required=False)
+class CustomUserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'first_name', 'last_name']
 
+    def get_validation_exclusions(self, instance=None):
+        exclusions = super().get_validation_exclusions(instance)
+        exclusions.append('email')
+        exclusions.append('password')
+        return exclusions
+
+
+class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'email', 'first_name', 'last_name', 'password']
 
 
-class OrganizationSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(required=True)
+class OrganizationSerializer(serializers.HyperlinkedModelSerializer):
+    url = serializers.HyperlinkedIdentityField(required=False, view_name='organization-detail')
 
     class Meta:
         model = Organization
-        fields = ['name', 'address']
+        fields = ['id', 'name', 'address', 'url']
 
     def update(self, instance, validated_data):
         organization = instance
@@ -27,14 +37,26 @@ class OrganizationSerializer(serializers.ModelSerializer):
         return super().update(organization, validated_data)
 
 
+class RecruiterUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recruiter
+        fields = ['job_title', 'phone_number']
+
+
+class RecruiterSwitchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recruiter
+        fields = ['id', 'user', 'organization', 'job_title', 'phone_number', 'url']
+
+
 class RecruiterSerializer(serializers.HyperlinkedModelSerializer):
     url = serializers.HyperlinkedIdentityField(required=False, view_name='recruiter-detail')
     organization = OrganizationSerializer(required=False)
-    user = CustomUserSerializer()
+    user = CustomUserSerializer(required=False)
 
     class Meta:
         model = Recruiter
-        fields = ['user', 'organization', 'job_title', 'phone_number', 'url']
+        fields = ['id', 'user', 'organization', 'job_title', 'phone_number', 'url']
 
     def create(self, validated_data):
         with transaction.atomic():
@@ -43,7 +65,8 @@ class RecruiterSerializer(serializers.HyperlinkedModelSerializer):
             user_password = user_data.pop('password')
             user, created = CustomUser.objects.get_or_create(email=user_data['email'], defaults=user_data)
             user.set_password(user_password)
-            organization_name = organization_data['name']
+            user.save()
+            organization_name = organization_data['name'].strip().lower()
             organization, created = Organization.objects.get_or_create(name=organization_name)
             if created:
                 organization.address = organization_data.get('address')
@@ -56,33 +79,16 @@ class RecruiterSerializer(serializers.HyperlinkedModelSerializer):
             organization.owner = recruiter
         return recruiter
 
-    def update(self, instance, validated_data):
-        user_data = validated_data.pop('user', None)
-        # strip unused payload, I want to maintain a separate endpoint for updating organizations
-        validated_data.pop('organization')
-
-        if user_data:
-            user = instance.user
-            user.email = user_data.get('email', user.email)
-            user.first_name = user_data.get('first_name', user.first_name)
-            user.last_name = user_data.get('last_name', user.last_name)
-            user.save()
-
-        instance.job_title = validated_data.get('job_title', instance.job_title)
-        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
-        instance.save()
-
-        return instance
-
 
 class ApplicantSerializer(serializers.ModelSerializer):
     user = CustomUserSerializer()
+    url = serializers.HyperlinkedIdentityField(required=False, view_name='applicant-detail')
 
     class Meta:
         model = Applicant
         fields = ['id', 'user', 'technology_stack', 'expected_salary',
                   'hourly_rate', 'resume', 'address', 'city',
-                  'state', 'zip_code']
+                  'state', 'zip_code', 'url']
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')

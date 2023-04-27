@@ -10,10 +10,10 @@ class Command(BaseCommand):
     help = 'Creates a superuser.'
 
     def handle(self, *args, **options):
-        if not User.objects.filter(username='admin').exists():
+        if not User.objects.filter(email=os.getenv('SUPER_USER_EMAIL')).exists():
             try:
                 User.objects.create_superuser(
-                    username=os.getenv('SUPER_USERNAME'),
+                    email=os.getenv('SUPER_USER_EMAIL'),
                     password=os.getenv('SUPER_USER_PASSWORD')
                 )
             except Exception as e:

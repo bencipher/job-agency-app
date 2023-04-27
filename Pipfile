@@ -15,6 +15,7 @@ black = "*"
 coverage = "*"
 pre-commit = "*"
 python-dotenv = "*"
+mixer = "*"
 
 [requires]
 python_version = "3.11"

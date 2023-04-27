@@ -33,9 +33,9 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
-    email = models.EmailField(unique=True)
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
+    email = models.EmailField(unique=True, max_length=30, blank=True, null=True)
+    first_name = models.CharField(max_length=30, blank=True, null=True)
+    last_name = models.CharField(max_length=30, blank=True, null=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
@@ -55,11 +55,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class Organization(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
-    name = models.CharField(editable=False, max_length=255, unique=True)
-    name = models.CharField(editable=False, max_length=255, unique=True)
-    address = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=20)
-    status = models.BooleanField(default=True)
+    name = models.CharField(max_length=255, null=False, blank=False)
+    address = models.CharField(max_length=255, blank=False, null=False, default='IL, Chicago')
+    still_exist = models.BooleanField(default=True, blank=False, null=False)
 
     class Meta:
         verbose_name = 'organization'
